@@ -13,7 +13,7 @@ This is a module to generate a sitemap.xml file for your SvelteKit project.
 1. Install the module:
 
 ```bash
-bun add -S github:max-lt/svelte-sitemap
+bun add -D github:max-lt/svelte-sitemap
 ```
 
 2. Add the plugin to your `svelte.config.ts`:

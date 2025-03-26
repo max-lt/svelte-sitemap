@@ -1,7 +1,5 @@
 /// <reference types="@types/bun" />
 
-import type { Plugin } from "vite";
-
 type SitemapUrl = {
   loc: string;
   lastmod?: string;
@@ -14,7 +12,7 @@ type SitemapOptions = {
   target: string;
 };
 
-export const sitemap = ({ website, target }: SitemapOptions): Plugin => ({
+export const sitemap = ({ website, target }: SitemapOptions) => ({
   name: "generate-sitemap",
   async closeBundle() {
     const pages = new Bun.Glob("**/+page.svelte");
