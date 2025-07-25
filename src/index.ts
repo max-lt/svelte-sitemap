@@ -12,15 +12,38 @@ type SitemapOptions = {
   target: string;
 };
 
+async function getLastCommitDate(filePath: string): Promise<string | null> {
+  const proc = Bun.spawn([
+    "git",
+    "log",
+    "-1",
+    "--pretty=format:%cI",
+    "--",
+    filePath,
+  ]);
+
+  const output = await new Response(proc.stdout).text();
+
+  console.log(`Last commit date= ${output.trim()} for ${filePath}`);
+
+  return output.trim() || null;
+}
+
 export const sitemap = ({ website, target }: SitemapOptions) => ({
   name: "generate-sitemap",
   async closeBundle() {
+    console.log("Generating sitemap...");
+
     const pages = new Bun.Glob("**/+page.svelte");
     const urls: SitemapUrl[] = [];
     for await (const page of pages.scan("src/routes")) {
       const file = Bun.file("src/routes/" + page);
 
-      const lastmod = new Date(file.lastModified).toISOString().split("T")[0];
+      const gitDate = await getLastCommitDate(file.name!);
+      const lastmod = new Date(gitDate || file.lastModified)
+        .toISOString()
+        .split("T")[0];
+
       const pageName = page.replace(/\/?\+page.svelte$/, "");
       const loc = pageName ? website + "/" + pageName : website;
 
@@ -40,7 +63,7 @@ export const sitemap = ({ website, target }: SitemapOptions) => ({
     ${url.lastmod ? `<lastmod>${url.lastmod}</lastmod>` : ""}
     ${url.changefreq ? `<changefreq>${url.changefreq}</changefreq>` : ""}
     ${url.priority ? `<priority>${url.priority}</priority>` : ""}
-  </url>`,
+  </url>`
     )
     .join("")
     .replace(/ +\n/g, "")}
